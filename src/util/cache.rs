@@ -79,11 +79,11 @@ fn hash_font(font: &BitmapFont) -> String {
 }
 
 pub fn get_cache_bundle_from_dir(path: &Path) -> Option<CacheBundle> {
-	path.join(".geode_cache")
+	path.join(".sapfire_cache")
 		.exists()
 		.then(|| {
 			let cache = ResourceCache::load(
-				fs::read_to_string(path.join(".geode_cache")).nice_unwrap("Unable to read cache"),
+				fs::read_to_string(path.join(".sapfire_cache")).nice_unwrap("Unable to read cache"),
 			);
 			Some(CacheBundle {
 				cache,
@@ -100,10 +100,10 @@ pub fn get_cache_bundle(path: &Path) -> Option<CacheBundle> {
 				File::open(path).nice_unwrap("Unable to open cached package"),
 			) {
 				Ok(mut archive) => {
-					let cache: ResourceCache = if archive.by_name(".geode_cache").is_ok() {
+					let cache: ResourceCache = if archive.by_name(".sapfire_cache").is_ok() {
 						let mut cache_data = String::new();
 						if archive
-							.by_name(".geode_cache")
+							.by_name(".sapfire_cache")
 							.unwrap()
 							.read_to_string(&mut cache_data)
 							.is_err()
@@ -145,7 +145,7 @@ impl ResourceCache {
 
 	pub fn save(&self, path: &Path) {
 		std::fs::write(
-			path.join(".geode_cache"),
+			path.join(".sapfire_cache"),
 			serde_json::to_string(self).unwrap(),
 		)
 		.unwrap()
@@ -153,14 +153,14 @@ impl ResourceCache {
 
 	pub fn add_sheet(&mut self, sheet: &SpriteSheet, path: PathBuf) {
 		if !path.is_relative() {
-			unreachable!("Contact geode developers: {}", path.display());
+			unreachable!("Contact sapfire developers: {}", path.display());
 		}
 		self.spritesheets.insert(hash_sheet(sheet), path);
 	}
 
 	pub fn add_font(&mut self, font: &BitmapFont, path: PathBuf) {
 		if !path.is_relative() {
-			unreachable!("Contact geode developers: {}", path.display());
+			unreachable!("Contact sapfire developers: {}", path.display());
 		}
 		self.fonts.insert(hash_font(font), path);
 	}

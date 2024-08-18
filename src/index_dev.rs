@@ -139,15 +139,15 @@ fn get_own_mods(validated: bool, config: &mut Config) -> Vec<SimpleDevMod> {
 
 	let response = client
 		.get(url)
-		.header(USER_AGENT, "GeodeCLI")
+		.header(USER_AGENT, "SapfireCLI")
 		.bearer_auth(config.index_token.clone().unwrap())
 		.send()
-		.nice_unwrap("Unable to connect to Geode Index");
+		.nice_unwrap("Unable to connect to Sapfire Index");
 
 	if response.status() != 200 {
 		let body: ApiResponse<String> = response
 			.json()
-			.nice_unwrap("Unable to parse response from Geode Index");
+			.nice_unwrap("Unable to parse response from Sapfire Index");
 		fatal!("Unable to fetch mods: {}", body.error);
 	}
 
@@ -159,7 +159,7 @@ fn get_own_mods(validated: bool, config: &mut Config) -> Vec<SimpleDevMod> {
 
 	let mods = response
 		.json::<ApiResponse<Vec<SimpleDevMod>>>()
-		.nice_unwrap("Unable to parse response from Geode Index");
+		.nice_unwrap("Unable to parse response from Sapfire Index");
 
 	mods.payload
 }
@@ -242,16 +242,16 @@ fn add_developer(mod_to_edit: &SimpleDevMod, config: &mut Config) {
 
 	let response = client
 		.post(url)
-		.header(USER_AGENT, "GeodeCLI")
+		.header(USER_AGENT, "SapfireCLI")
 		.bearer_auth(config.index_token.clone().unwrap())
 		.json(&json!({ "username": username }))
 		.send()
-		.nice_unwrap("Unable to connect to Geode Index");
+		.nice_unwrap("Unable to connect to Sapfire Index");
 
 	if response.status() != 204 {
 		let body: ApiResponse<String> = response
 			.json()
-			.nice_unwrap("Unable to parse response from Geode Index");
+			.nice_unwrap("Unable to parse response from Sapfire Index");
 		warn!("Unable to add developer: {}", body.error);
 	} else {
 		info!("Developer added successfully");
@@ -269,15 +269,15 @@ fn remove_developer(mod_to_edit: &SimpleDevMod, config: &mut Config) {
 
 	let response = client
 		.delete(url)
-		.header(USER_AGENT, "GeodeCLI")
+		.header(USER_AGENT, "SapfireCLI")
 		.bearer_auth(config.index_token.clone().unwrap())
 		.send()
-		.nice_unwrap("Unable to connect to Geode Index");
+		.nice_unwrap("Unable to connect to Sapfire Index");
 
 	if response.status() != 204 {
 		let body: ApiResponse<String> = response
 			.json()
-			.nice_unwrap("Unable to parse response from Geode Index");
+			.nice_unwrap("Unable to parse response from Sapfire Index");
 		warn!("Unable to remove developer: {}", body.error);
 	} else {
 		info!("Developer removed successfully");
@@ -295,21 +295,21 @@ pub fn get_user_profile(config: &mut Config) -> DeveloperProfile {
 
 	let response = client
 		.get(url)
-		.header(USER_AGENT, "GeodeCLI")
+		.header(USER_AGENT, "SapfireCLI")
 		.bearer_auth(config.index_token.clone().unwrap())
 		.send()
-		.nice_unwrap("Unable to connect to Geode Index");
+		.nice_unwrap("Unable to connect to Sapfire Index");
 
 	if response.status() != 200 {
 		let body: ApiResponse<String> = response
 			.json()
-			.nice_unwrap("Unable to parse response from Geode Index");
+			.nice_unwrap("Unable to parse response from Sapfire Index");
 		fatal!("Unable to fetch profile: {}", body.error);
 	}
 
 	let profile = response
 		.json::<ApiResponse<DeveloperProfile>>()
-		.nice_unwrap("Unable to parse response from Geode Index");
+		.nice_unwrap("Unable to parse response from Sapfire Index");
 
 	profile.payload
 }
@@ -348,7 +348,7 @@ pub fn edit_profile(config: &mut Config) {
 					let url = index::get_index_url("/v1/me".to_string(), config);
 					let response = client
 						.put(url)
-						.header(USER_AGENT, "GeodeCLI")
+						.header(USER_AGENT, "SapfireCLI")
 						.bearer_auth(config.index_token.clone().unwrap())
 						.json(&json![
 							{
@@ -356,12 +356,12 @@ pub fn edit_profile(config: &mut Config) {
 							}
 						])
 						.send()
-						.nice_unwrap("Unable to connect to Geode Index");
+						.nice_unwrap("Unable to connect to Sapfire Index");
 
 					if response.status() != 204 {
 						let body: ApiResponse<String> = response
 							.json()
-							.nice_unwrap("Unable to parse response from Geode Index");
+							.nice_unwrap("Unable to parse response from Sapfire Index");
 						fatal!("Unable to update profile: {}", body.error);
 					}
 

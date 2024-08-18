@@ -1,2 +1,2 @@
-# Geode Command Line
-Command-line utilities for working w/ geode.
+# Sapfire Command Line
+Command-line utilities for working w/ sapfire.

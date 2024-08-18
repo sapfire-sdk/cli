@@ -16,7 +16,7 @@ mod util;
 
 use crate::profile::RunBackground;
 use clap::{CommandFactory, Parser};
-use cli::{Args, GeodeCommands};
+use cli::{Args, SapfireCommands};
 use util::*;
 
 fn main() {
@@ -31,14 +31,14 @@ fn main() {
 	let mut config = config::Config::new();
 
 	match args.command {
-		GeodeCommands::New { path } => template::build_template(&mut config, path),
-		GeodeCommands::Profile { commands } => profile::subcommand(&mut config, commands),
-		GeodeCommands::Config { commands } => info::subcommand(&mut config, commands),
-		GeodeCommands::Sdk { commands } => sdk::subcommand(&mut config, commands),
-		GeodeCommands::Package { commands } => package::subcommand(&mut config, commands),
-		GeodeCommands::Project { commands } => project::subcommand(&mut config, commands),
-		GeodeCommands::Index { commands } => index::subcommand(&mut config, commands),
-		GeodeCommands::Run {
+		SapfireCommands::New { path } => template::build_template(&mut config, path),
+		SapfireCommands::Profile { commands } => profile::subcommand(&mut config, commands),
+		SapfireCommands::Config { commands } => info::subcommand(&mut config, commands),
+		SapfireCommands::Sdk { commands } => sdk::subcommand(&mut config, commands),
+		SapfireCommands::Package { commands } => package::subcommand(&mut config, commands),
+		SapfireCommands::Project { commands } => project::subcommand(&mut config, commands),
+		SapfireCommands::Index { commands } => index::subcommand(&mut config, commands),
+		SapfireCommands::Run {
 			background,
 			stay,
 			launch_args,
@@ -53,7 +53,7 @@ fn main() {
 			},
 			launch_args,
 		),
-		GeodeCommands::Build {
+		SapfireCommands::Build {
 			platform,
 			configure_only,
 			build_only,
@@ -68,12 +68,12 @@ fn main() {
 			config,
 			extra_conf_args,
 		),
-		GeodeCommands::Completions { shell } => {
+		SapfireCommands::Completions { shell } => {
 			let mut app = Args::command();
 			let bin_name = app.get_name().to_string();
 			clap_complete::generate(shell, &mut app, bin_name, &mut std::io::stdout());
 		}
-		GeodeCommands::GenerateManpage {} => {
+		SapfireCommands::GenerateManpage {} => {
 			let app = Args::command();
 			let man = clap_mangen::Man::new(app);
 			let _ = man.render(&mut std::io::stdout());

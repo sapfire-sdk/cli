@@ -77,7 +77,7 @@ where
 	D: Deserializer<'de>,
 {
 	// semver doesn't accept "v" prefixes and the string will be validated at
-	// runtime by Geode anyway so let's just crudely remove all 'v's for now
+	// runtime by Sapfire anyway so let's just crudely remove all 'v's for now
 	Version::parse(&<String>::deserialize(deserializer)?.replace('v', ""))
 		.map_err(serde::de::Error::custom)
 }
@@ -87,9 +87,9 @@ where
 	D: Deserializer<'de>,
 {
 	// semver doesn't accept "v" prefixes and the string will be validated at
-	// runtime by Geode anyway so let's just crudely remove all 'v's for now
+	// runtime by Sapfire anyway so let's just crudely remove all 'v's for now
 	let str = <String>::deserialize(deserializer)?.replace('v', "");
-	// semver defaults to ^, geode defaults to >=
+	// semver defaults to ^, sapfire defaults to >=
 	let actual_equal = str.starts_with('=');
 	VersionReq::parse(&str)
 		.map_err(serde::de::Error::custom)
@@ -104,13 +104,13 @@ where
 		})
 }
 
-pub trait ToGeodeString {
-	fn to_geode_string(&self) -> String;
+pub trait ToSapfireString {
+	fn to_sapfire_string(&self) -> String;
 }
 
-impl ToGeodeString for VersionReq {
-	fn to_geode_string(&self) -> String {
-		// geode uses = instead of ^ for exact version
+impl ToSapfireString for VersionReq {
+	fn to_sapfire_string(&self) -> String {
+		// sapfire uses = instead of ^ for exact version
 		self.to_string().replace('^', "=")
 	}
 }
@@ -340,7 +340,7 @@ impl<'de> Deserialize<'de> for Developers {
 #[derive(Deserialize, PartialEq)]
 pub struct ModFileInfo {
 	#[serde(deserialize_with = "parse_version")]
-	pub geode: Version,
+	pub sapfire: Version,
 	pub gd: GDVersion,
 	pub id: String,
 	pub name: String,

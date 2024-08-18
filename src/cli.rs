@@ -1,16 +1,16 @@
 use crate::mod_file::PlatformName;
 
-/// Command-line interface for Geode
+/// Command-line interface for Sapfire
 #[derive(clap::Parser, Debug)]
 #[clap(version)]
 pub struct Args {
 	#[clap(subcommand)]
-	pub command: GeodeCommands,
+	pub command: SapfireCommands,
 }
 
 #[derive(clap::Subcommand, Debug)]
-pub enum GeodeCommands {
-	/// Initialize a new Geode project
+pub enum SapfireCommands {
+	/// Initialize a new Sapfire project
 	New {
 		/// The target directory to create the project in
 		path: Option<std::path::PathBuf>,
@@ -22,19 +22,19 @@ pub enum GeodeCommands {
 	/// Generate manpage and print it to stdout
 	GenerateManpage {},
 
-	/// Options for managing profiles (installations of Geode)
+	/// Options for managing profiles (installations of Sapfire)
 	Profile {
 		#[clap(subcommand)]
 		commands: crate::profile::Profile,
 	},
 
-	/// Options for configuring Geode CLI
+	/// Options for configuring Sapfire CLI
 	Config {
 		#[clap(subcommand)]
 		commands: crate::info::Info,
 	},
 
-	/// Options for installing & managing the Geode SDK
+	/// Options for installing & managing the Sapfire SDK
 	Sdk {
 		#[clap(subcommand)]
 		commands: crate::sdk::Sdk,
@@ -46,13 +46,13 @@ pub enum GeodeCommands {
 		commands: crate::project::Project,
 	},
 
-	/// Options for working with .geode packages
+	/// Options for working with .sapfire packages
 	Package {
 		#[clap(subcommand)]
 		commands: crate::package::Package,
 	},
 
-	/// Tools for interacting with the Geode mod index
+	/// Tools for interacting with the Sapfire mod index
 	Index {
 		#[clap(subcommand)]
 		commands: crate::index::Index,

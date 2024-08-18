@@ -19,21 +19,21 @@ jobs:
         - name: "Windows"
           id: win
           os: ubuntu-latest
-          executable: 'geode.exe'
+          executable: 'sapfire.exe'
           prebuild: 'sudo apt-get install gcc-mingw-w64-x86-64'
           target: x86_64-pc-windows-gnu
 
         - name: "macOS"
           id: mac
           os: macos-12
-          executable: 'geode'
+          executable: 'sapfire'
           prebuild: 'export OPENSSL_STATIC=1'
           target: x86_64-apple-darwin
 
         - name: "Linux"
           id: linux
           os: ubuntu-latest
-          executable: 'geode'
+          executable: 'sapfire'
           # some stupid old ubuntu versions cant install libssl3
           prebuild: 'export OPENSSL_STATIC=1'
           target: x86_64-unknown-linux-gnu
@@ -67,7 +67,7 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: geode-cli-${{ matrix.config.id }}
+        name: sapfire-cli-${{ matrix.config.id }}
         path: ./out/
 
   publish:
@@ -95,20 +95,20 @@ jobs:
     - name: Zip Windows Artifacts
       uses: vimtor/action-zip@v1.2
       with:
-        files: artifacts/geode-cli-win/geode.exe
-        dest: artifacts/geode-cli-${{ steps.ref.outputs.hash }}-win.zip
+        files: artifacts/sapfire-cli-win/sapfire.exe
+        dest: artifacts/sapfire-cli-${{ steps.ref.outputs.hash }}-win.zip
 
     - name: Zip macOS Artifacts
       uses: vimtor/action-zip@v1.2
       with:
-        files: artifacts/geode-cli-mac/geode
-        dest: artifacts/geode-cli-${{ steps.ref.outputs.hash }}-mac.zip
+        files: artifacts/sapfire-cli-mac/sapfire
+        dest: artifacts/sapfire-cli-${{ steps.ref.outputs.hash }}-mac.zip
 
     - name: Zip Linux Artifacts
       uses: vimtor/action-zip@v1.2
       with:
-        files: artifacts/geode-cli-linux/geode
-        dest: artifacts/geode-cli-${{ steps.ref.outputs.hash }}-linux.zip
+        files: artifacts/sapfire-cli-linux/sapfire
+        dest: artifacts/sapfire-cli-${{ steps.ref.outputs.hash }}-linux.zip
 
     - name: Update Development Release
       uses: andelf/nightly-release@main
@@ -117,6 +117,6 @@ jobs:
       with:
         tag_name: nightly
         name: 'Development Release'
-        body: Geode CLI development release for commit ${{ github.sha }}.
+        body: Sapfire CLI development release for commit ${{ github.sha }}.
         files: |
           ./artifacts/*.zip

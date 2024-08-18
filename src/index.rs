@@ -77,12 +77,12 @@ pub enum Index {
 pub enum MyModAction {
 	/// Create a new mod
 	Create {
-		/// Direct download link to the .geode file
+		/// Direct download link to the .sapfire file
 		download_link: Option<String>,
 	},
 	/// Update an existing mod
 	Update {
-		/// Direct download link to the .geode file
+		/// Direct download link to the .sapfire file
 		download_link: Option<String>,
 	},
 	/// List your published mods
@@ -140,7 +140,7 @@ pub fn install_mod(
 	let dest = config
 		.get_current_profile()
 		.mods_dir()
-		.join(format!("{id}.geode"));
+		.join(format!("{id}.sapfire"));
 
 	let mut hasher = Sha3_256::new();
 	hasher.update(&bytes);
@@ -152,12 +152,12 @@ pub fn install_mod(
 			    {hash}\n\
 			 vs {}\n\
 			Try again, and if the issue persists, report this on GitHub: \
-			https://github.com/geode-sdk/cli/issues/new",
+			https://github.com/sapfire-sdk/cli/issues/new",
 			found_version.version
 		);
 	}
 
-	fs::write(&dest, bytes).nice_unwrap("Unable to install .geode file");
+	fs::write(&dest, bytes).nice_unwrap("Unable to install .sapfire file");
 
 	dest
 }
@@ -165,7 +165,7 @@ pub fn install_mod(
 fn create_index_json(path: &Path) {
 	let url = ask_value("URL", None, true);
 
-	let response = reqwest::blocking::get(&url).nice_unwrap("Unable to access .geode file at URL");
+	let response = reqwest::blocking::get(&url).nice_unwrap("Unable to access .sapfire file at URL");
 
 	let file_name = reqwest::Url::parse(&url)
 		.unwrap()
@@ -182,7 +182,7 @@ fn create_index_json(path: &Path) {
 
 	let file_contents = response
 		.bytes()
-		.nice_unwrap("Unable to access .geode file at URL");
+		.nice_unwrap("Unable to access .sapfire file at URL");
 
 	let mut hasher = Sha3_256::new();
 	hasher.update(&file_contents);
@@ -272,7 +272,7 @@ fn submit(action: MyModAction, config: &mut Config) {
 	}
 
 	let download_link =
-		download_link.unwrap_or_else(|| ask_value("Download URL for the .geode file", None, true));
+		download_link.unwrap_or_else(|| ask_value("Download URL for the .sapfire file", None, true));
 	let mut id: Option<String> = None;
 	#[derive(Deserialize)]
 	struct SimpleModJson {
@@ -280,7 +280,7 @@ fn submit(action: MyModAction, config: &mut Config) {
 	}
 
 	if is_update {
-		info!("Fetching mod id from .geode file");
+		info!("Fetching mod id from .sapfire file");
 		let mut zip_data: Cursor<Vec<u8>> = Cursor::new(vec![]);
 
 		let mut response =
@@ -290,7 +290,7 @@ fn submit(action: MyModAction, config: &mut Config) {
 			.nice_unwrap("Unable to write to index");
 
 		let mut zip_archive =
-			zip::ZipArchive::new(zip_data).nice_unwrap("Unable to decode .geode file");
+			zip::ZipArchive::new(zip_data).nice_unwrap("Unable to decode .sapfire file");
 
 		let json_file = zip_archive
 			.by_name("mod.json")
@@ -331,11 +331,11 @@ fn create_mod(download_link: &str, config: &mut Config) {
 
 	let response = client
 		.post(url)
-		.header(USER_AGENT, "GeodeCLI")
+		.header(USER_AGENT, "SapfireCLI")
 		.bearer_auth(config.index_token.clone().unwrap())
 		.json(&payload)
 		.send()
-		.nice_unwrap("Unable to connect to Geode Index");
+		.nice_unwrap("Unable to connect to Sapfire Index");
 
 	if response.status() == 401 {
 		config.index_token = None;
@@ -346,7 +346,7 @@ fn create_mod(download_link: &str, config: &mut Config) {
 	if response.status() != 204 {
 		let body: ApiResponse<String> = response
 			.json()
-			.nice_unwrap("Unable to parse response from Geode Index");
+			.nice_unwrap("Unable to parse response from Sapfire Index");
 		fatal!("Unable to create mod: {}", body.error);
 	}
 
@@ -375,11 +375,11 @@ fn update_mod(id: &str, download_link: &str, config: &mut Config) {
 
 	let response = client
 		.post(url)
-		.header(USER_AGENT, "GeodeCLI")
+		.header(USER_AGENT, "SapfireCLI")
 		.bearer_auth(config.index_token.clone().unwrap())
 		.json(&payload)
 		.send()
-		.nice_unwrap("Unable to connect to Geode Index");
+		.nice_unwrap("Unable to connect to Sapfire Index");
 
 	if response.status() == 401 {
 		config.index_token = None;
@@ -390,7 +390,7 @@ fn update_mod(id: &str, download_link: &str, config: &mut Config) {
 	if response.status() != 204 {
 		let body: ApiResponse<String> = response
 			.json()
-			.nice_unwrap("Unable to parse response from Geode Index");
+			.nice_unwrap("Unable to parse response from Sapfire Index");
 		fatal!("Unable to create version for mod: {}", body.error);
 	}
 
@@ -399,7 +399,7 @@ fn update_mod(id: &str, download_link: &str, config: &mut Config) {
 
 fn set_index_url(url: String, config: &mut Config) {
 	if url == "default" {
-		config.index_url = "https://api.geode-sdk.org".to_string();
+		config.index_url = "https://api.sapfire-sdk.org".to_string();
 	} else {
 		config.index_url = url;
 	}
@@ -445,7 +445,7 @@ pub fn get_mod_versions(
 	let response = client
 		.get(url)
 		.query(&query)
-		.header(USER_AGENT, "GeodeCLI")
+		.header(USER_AGENT, "SapfireCLI")
 		.send()
 		.nice_unwrap("Couldn't connect to the index");
 

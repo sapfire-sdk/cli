@@ -11,7 +11,7 @@ pub fn build_project(
 	extra_conf_args: Vec<String>,
 ) {
 	if !Path::new("CMakeLists.txt").exists() {
-		fatal!("Could not find CMakeLists.txt. Please run this within a Geode project!");
+		fatal!("Could not find CMakeLists.txt. Please run this within a Sapfire project!");
 	}
 
 	let platform = platform
@@ -110,7 +110,7 @@ pub fn build_project(
 				}
 				conf_args.push("-DCMAKE_EXPORT_COMPILE_COMMANDS=1".into());
 				// TODO: cli cant install to a mobile device, yet
-				conf_args.push("-DGEODE_DONT_INSTALL_MODS=1".into());
+				conf_args.push("-DSAPFIRE_DONT_INSTALL_MODS=1".into());
 			}
 		}
 	}

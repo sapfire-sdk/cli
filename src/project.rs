@@ -1,4 +1,4 @@
-use crate::mod_file::{PlatformName, ToGeodeString};
+use crate::mod_file::{PlatformName, ToSapfireString};
 use crate::util::mod_file::DependencyImportance;
 use crate::{done, fail, fatal, index, info, warn, NiceUnwrap};
 use crate::{
@@ -23,7 +23,7 @@ use std::{
 #[derive(Subcommand, Debug)]
 #[clap(rename_all = "kebab-case")]
 pub enum Project {
-	/// Initialize a new Geode project (same as `geode new`)
+	/// Initialize a new Sapfire project (same as `sapfire new`)
 	New {
 		/// The target directory to create the project in
 		path: Option<PathBuf>,
@@ -35,7 +35,7 @@ pub enum Project {
 	/// Check & install the dependencies for this project
 	Check {
 		/// Where to install the dependencies; usually the project's build
-		/// directory. A directory called geode-deps will be created inside
+		/// directory. A directory called sapfire-deps will be created inside
 		/// the specified installation directory. If not specified, "build"
 		/// is assumed
 		install_dir: Option<PathBuf>,
@@ -73,7 +73,7 @@ fn clear_cache(dir: &Path) {
 	let workdir = get_working_dir(&mod_info.id);
 	fs::remove_dir_all(workdir).nice_unwrap("Unable to remove cache directory");
 
-	// Remove cached .geode package
+	// Remove cached .sapfire package
 	let dir = find_build_directory(dir);
 	if let Some(dir) = dir {
 		for file in fs::read_dir(dir).nice_unwrap("Unable to read build directory") {
@@ -81,13 +81,13 @@ fn clear_cache(dir: &Path) {
 			let Some(ext) = path.extension() else {
 				continue;
 			};
-			if ext == "geode" {
-				fs::remove_file(path).nice_unwrap("Unable to delete cached .geode package");
+			if ext == "sapfire" {
+				fs::remove_file(path).nice_unwrap("Unable to delete cached .sapfire package");
 			}
 		}
 	} else {
 		warn!(
-			"Unable to find cached .geode package, can't clear it. It might be \
+			"Unable to find cached .sapfire package, can't clear it. It might be \
             that this is not supported on the current platform, or that your \
             build directory has a different name"
 		);
@@ -142,7 +142,7 @@ fn find_index_dependency(dep: &Dependency, config: &Config) -> Result<Found, Str
 		10,
 		config,
 		false,
-		Some(dep.version.to_geode_string()),
+		Some(dep.version.to_sapfire_string()),
 	)?;
 
 	if found.data.is_empty() {
@@ -175,7 +175,7 @@ fn find_index_dependency(dep: &Dependency, config: &Config) -> Result<Found, Str
 	info!("Writing dependency to temp file");
 
 	let mut path = env::temp_dir();
-	path.push(format!("{}.geode", dep.id));
+	path.push(format!("{}.sapfire", dep.id));
 
 	if let Err(e) = std::fs::write(&path, bytes) {
 		return Err(format!("Failed to write dependency to temp file: {}", e));
@@ -272,7 +272,7 @@ pub fn check_dependencies(
 
 	let mut errors = false;
 
-	let dep_dir = output.join("geode-deps");
+	let dep_dir = output.join("sapfire-deps");
 	fs::create_dir_all(&dep_dir).nice_unwrap("Unable to create dependency directory");
 
 	let platform = platform
@@ -347,7 +347,7 @@ pub fn check_dependencies(
 					If this is a mod that hasn't been published yet, install it \
 					locally first, or if it's a closed-source mod that won't be \
 					on the index, mark it as external in your CMake using \
-					setup_geode_mod(... EXTERNALS {0}:{1})",
+					setup_sapfire_mod(... EXTERNALS {0}:{1})",
 					dep.id,
 					dep.version
 				);
@@ -393,13 +393,13 @@ pub fn check_dependencies(
 			continue;
 		}
 
-		let path_to_dep_geode;
-		let _geode_info;
+		let path_to_dep_sapfire;
+		let _sapfire_info;
 		match (found_in_installed, found_in_index) {
 			(Found::Some(inst_path, inst_info), Found::Some(_, _)) => {
 				info!("Dependency '{}' found", dep.id);
-				path_to_dep_geode = inst_path;
-				_geode_info = inst_info;
+				path_to_dep_sapfire = inst_path;
+				_sapfire_info = inst_info;
 			}
 
 			(Found::Some(inst_path, inst_info), _) => {
@@ -413,11 +413,11 @@ pub fn check_dependencies(
 				info!(
 					"If '{0}' is a closed-source mod that won't be released on \
 					the index, mark it as external in your CMake with \
-					setup_geode_mod(... EXTERNALS {0}:{1})",
+					setup_sapfire_mod(... EXTERNALS {0}:{1})",
 					dep.id, dep.version
 				);
-				path_to_dep_geode = inst_path;
-				_geode_info = inst_info;
+				path_to_dep_sapfire = inst_path;
+				_sapfire_info = inst_info;
 			}
 
 			(Found::Wrong(version), Found::Some(path, indx_info)) => {
@@ -438,13 +438,13 @@ pub fn check_dependencies(
 					(update '{}' => '{}')",
 					dep.id, version, indx_info.version
 				);
-				let geode_path = config
+				let sapfire_path = config
 					.get_current_profile()
 					.mods_dir()
-					.join(format!("{}.geode", indx_info.id));
-				std::fs::copy(path, &geode_path).nice_unwrap("Failed to install .geode");
-				path_to_dep_geode = geode_path;
-				_geode_info = indx_info;
+					.join(format!("{}.sapfire", indx_info.id));
+				std::fs::copy(path, &sapfire_path).nice_unwrap("Failed to install .sapfire");
+				path_to_dep_sapfire = sapfire_path;
+				_sapfire_info = indx_info;
 			}
 
 			(_, Found::Some(path, indx_info)) => {
@@ -452,13 +452,13 @@ pub fn check_dependencies(
 					"Dependency '{}' found on the index, installing (version '{}')",
 					dep.id, indx_info.version
 				);
-				let geode_path = config
+				let sapfire_path = config
 					.get_current_profile()
 					.mods_dir()
-					.join(format!("{}.geode", indx_info.id));
-				std::fs::copy(path, &geode_path).nice_unwrap("Failed to install .geode");
-				path_to_dep_geode = geode_path;
-				_geode_info = indx_info;
+					.join(format!("{}.sapfire", indx_info.id));
+				std::fs::copy(path, &sapfire_path).nice_unwrap("Failed to install .sapfire");
+				path_to_dep_sapfire = sapfire_path;
+				_sapfire_info = indx_info;
 			}
 
 			_ => unreachable!(),
@@ -474,22 +474,22 @@ pub fn check_dependencies(
 		// cause issues if the dependency has changes
 		// check if dependency already installed
 		// if let Found::Some(_, info) = found_in_deps {
-		// 	if info.version == geode_info.version {
+		// 	if info.version == sapfire_info.version {
 		// 		continue;
 		// 	}
 		// }
 
-		// unzip the whole .geode package because there's only like a few
+		// unzip the whole .sapfire package because there's only like a few
 		// extra files there aside from the lib, headers, and resources
-		zip::ZipArchive::new(fs::File::open(path_to_dep_geode).unwrap())
+		zip::ZipArchive::new(fs::File::open(path_to_dep_sapfire).unwrap())
 			.nice_unwrap("Unable to unzip")
 			.extract(dep_dir.join(&dep.id))
-			.nice_unwrap("Unable to extract geode package");
+			.nice_unwrap("Unable to extract sapfire package");
 
 		// add a note saying if the dependencey is required or not (for cmake to
 		// know if to link or not)
 		fs::write(
-			dep_dir.join(dep.id).join("geode-dep-options.json"),
+			dep_dir.join(dep.id).join("sapfire-dep-options.json"),
 			format!(
 				r#"{{ "required": {} }}"#,
 				if dep.importance == DependencyImportance::Required

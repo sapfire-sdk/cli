@@ -131,7 +131,7 @@ fn uninstall() -> bool {
 	let sdk_path = Config::sdk_path();
 
 	if !ask_confirm(
-		&format!("Are you sure you want to uninstall Geode SDK? (Installed at {sdk_path:?})"),
+		&format!("Are you sure you want to uninstall Sapfire SDK? (Installed at {sdk_path:?})"),
 		false,
 	) {
 		fail!("Aborting");
@@ -143,7 +143,7 @@ fn uninstall() -> bool {
 		return false;
 	}
 
-	done!("Uninstalled Geode SDK");
+	done!("Uninstalled Sapfire SDK");
 	true
 }
 
@@ -155,11 +155,11 @@ fn set_sdk_env(path: &Path) -> bool {
 		let hklm = RegKey::predef(winreg::enums::HKEY_CURRENT_USER);
 		if hklm
 			.create_subkey("Environment")
-			.map(|(env, _)| env.set_value("GEODE_SDK", &path.to_str().unwrap().to_string()))
+			.map(|(env, _)| env.set_value("SAPFIRE_SDK", &path.to_str().unwrap().to_string()))
 			.is_err()
 		{
 			warn!(
-				"Unable to set the GEODE_SDK enviroment variable to {}",
+				"Unable to set the SAPFIRE_SDK enviroment variable to {}",
 				path.to_str().unwrap()
 			);
 			env_success = false;
@@ -219,7 +219,7 @@ fn set_sdk_env(path: &Path) -> bool {
 		let shell = match detect_user_shell() {
 			Some(s) => s,
 			None => {
-				warn!("Couldn't detect user shell. The CLI only supports bash, zsh and fish for setting the GEODE_SDK environment variable at the moment.");
+				warn!("Couldn't detect user shell. The CLI only supports bash, zsh and fish for setting the SAPFIRE_SDK environment variable at the moment.");
 				return false;
 			}
 		};
@@ -296,26 +296,26 @@ fn get_linux_shell_info(shell: UserShell, path: &Path) -> Option<LinuxShellConfi
 		UserShell::Bash => Some(LinuxShellConfig {
 			profile: format!("{}/.bash_profile", home),
 			profile_bak: format!("{}/.bash_profile.bak", home),
-			regex: Regex::new("export GEODE_SDK=.*").unwrap(),
-			replace_with: format!("export GEODE_SDK={}", path.to_str().unwrap()),
+			regex: Regex::new("export SAPFIRE_SDK=.*").unwrap(),
+			replace_with: format!("export SAPFIRE_SDK={}", path.to_str().unwrap()),
 		}),
 		UserShell::Zsh => Some(LinuxShellConfig {
 			profile: format!("{}/.zshenv", home),
 			profile_bak: format!("{}/.zshenv", home),
-			regex: Regex::new("export GEODE_SDK=.*").unwrap(),
-			replace_with: format!("export GEODE_SDK={}", path.to_str().unwrap()),
+			regex: Regex::new("export SAPFIRE_SDK=.*").unwrap(),
+			replace_with: format!("export SAPFIRE_SDK={}", path.to_str().unwrap()),
 		}),
 		UserShell::Fish => Some(LinuxShellConfig {
-			profile: format!("{}/.config/fish/conf.d/geode.fish", home),
-			profile_bak: format!("{}/.config/fish/conf.d/geode.fish.bak", home),
-			regex: Regex::new("set -gx GEODE_SDK.*").unwrap(),
-			replace_with: format!("set -gx GEODE_SDK {}", path.to_str().unwrap()),
+			profile: format!("{}/.config/fish/conf.d/sapfire.fish", home),
+			profile_bak: format!("{}/.config/fish/conf.d/sapfire.fish.bak", home),
+			regex: Regex::new("set -gx SAPFIRE_SDK.*").unwrap(),
+			replace_with: format!("set -gx SAPFIRE_SDK {}", path.to_str().unwrap()),
 		}),
 	}
 }
 
 fn get_sdk_path() -> Option<PathBuf> {
-	if std::env::var("GEODE_SDK").is_ok() && Config::try_sdk_path().is_ok() {
+	if std::env::var("SAPFIRE_SDK").is_ok() && Config::try_sdk_path().is_ok() {
 		Some(Config::sdk_path())
 	} else {
 		None
@@ -346,7 +346,7 @@ fn install(config: &mut Config, path: PathBuf, force: bool) {
 	let path = path.absolutize().nice_unwrap("Failed to get absolute path");
 	let parent = path.parent().unwrap();
 
-	if !force && std::env::var("GEODE_SDK").is_ok() {
+	if !force && std::env::var("SAPFIRE_SDK").is_ok() {
 		if Config::try_sdk_path().is_ok() {
 			fail!(
 				"SDK is already installed at {}",
@@ -355,8 +355,8 @@ fn install(config: &mut Config, path: PathBuf, force: bool) {
 			info!("Use --reinstall if you want to remove the existing installation");
 			return;
 		} else {
-			let env_sdk_path = std::env::var("GEODE_SDK").unwrap();
-			info!("GEODE_SDK ({env_sdk_path}) is already set, but seems to point to an invalid sdk installation.");
+			let env_sdk_path = std::env::var("SAPFIRE_SDK").unwrap();
+			info!("SAPFIRE_SDK ({env_sdk_path}) is already set, but seems to point to an invalid sdk installation.");
 			if !crate::logging::ask_confirm("Do you wish to proceed?", true) {
 				fatal!("Aborting");
 			}
@@ -371,16 +371,16 @@ fn install(config: &mut Config, path: PathBuf, force: bool) {
 
 	info!("Downloading SDK");
 
-	let repo = clone_repo("https://github.com/geode-sdk/geode", &path)
+	let repo = clone_repo("https://github.com/sapfire-sdk/sapfire", &path)
 		.nice_unwrap("Could not download SDK");
 
-	// set GEODE_SDK environment variable;
+	// set SAPFIRE_SDK environment variable;
 	if set_sdk_env(&path) {
-		info!("Set GEODE_SDK environment variable automatically");
+		info!("Set SAPFIRE_SDK environment variable automatically");
 	} else {
-		warn!("Unable to set GEODE_SDK environment variable automatically");
+		warn!("Unable to set SAPFIRE_SDK environment variable automatically");
 		info!(
-			"Please set the GEODE_SDK enviroment variable to {}",
+			"Please set the SAPFIRE_SDK enviroment variable to {}",
 			path.to_str().unwrap()
 		);
 	}
@@ -390,8 +390,8 @@ fn install(config: &mut Config, path: PathBuf, force: bool) {
 	switch_to_tag(config, &repo);
 
 	done!("Successfully installed SDK");
-	info!("Please restart your command line to have the GEODE_SDK enviroment variable set.");
-	info!("Use `geode sdk install-binaries` to install pre-built binaries");
+	info!("Please restart your command line to have the SAPFIRE_SDK enviroment variable set.");
+	info!("Use `sapfire sdk install-binaries` to install pre-built binaries");
 }
 
 fn fetch_repo_info(repo: &git2::Repository) -> git2::MergeAnalysis {
@@ -578,7 +578,7 @@ fn install_binaries(config: &mut Config, platform: Option<String>, version: Opti
 		let ver = get_version();
 		info!("Installing binaries for {}", ver);
 		release_tag = format!("v{}", ver);
-		// remove any -beta or -alpha suffixes as geode cmake doesn't care about those
+		// remove any -beta or -alpha suffixes as sapfire cmake doesn't care about those
 		let mut stripped_ver = ver.clone();
 		stripped_ver.pre = Prerelease::EMPTY;
 		target_dir = Config::sdk_path().join(format!("bin/{}", stripped_ver));
@@ -586,7 +586,7 @@ fn install_binaries(config: &mut Config, platform: Option<String>, version: Opti
 
 	let res = reqwest::blocking::Client::new()
 		.get(format!(
-			"https://api.github.com/repos/geode-sdk/geode/releases/tags/{}",
+			"https://api.github.com/repos/sapfire-sdk/sapfire/releases/tags/{}",
 			release_tag
 		))
 		.header(USER_AGENT, "github_api/1.0")
@@ -597,7 +597,7 @@ fn install_binaries(config: &mut Config, platform: Option<String>, version: Opti
 		.send()
 		.nice_unwrap("Unable to get download info from GitHub")
 		.json::<GithubReleaseResponse>()
-		.nice_unwrap(format!("Could not parse Geode release \"{}\"", release_tag));
+		.nice_unwrap(format!("Could not parse Sapfire release \"{}\"", release_tag));
 
 	let mut target_url: Option<String> = None;
 	let platform = platform
@@ -611,7 +611,7 @@ fn install_binaries(config: &mut Config, platform: Option<String>, version: Opti
 		}
 
 		// skip resources
-		if !asset.name.to_lowercase().contains("geode") {
+		if !asset.name.to_lowercase().contains("sapfire") {
 			continue;
 		}
 
@@ -663,20 +663,20 @@ fn install_binaries(config: &mut Config, platform: Option<String>, version: Opti
 
 fn set_sdk_path(path: PathBuf, do_move: bool) {
 	if do_move {
-		let old = std::env::var("GEODE_SDK")
+		let old = std::env::var("SAPFIRE_SDK")
 			.map(PathBuf::from)
 			.nice_unwrap("Cannot locate SDK.");
 
 		assert!(
 			old.is_dir(),
-			"Internal Error: GEODE_SDK doesn't point to a directory ({}). This \
-			might be caused by having run `geode sdk set-path` - try restarting \
-			your terminal / computer, or reinstall using `geode sdk install --reinstall`",
+			"Internal Error: SAPFIRE_SDK doesn't point to a directory ({}). This \
+			might be caused by having run `sapfire sdk set-path` - try restarting \
+			your terminal / computer, or reinstall using `sapfire sdk install --reinstall`",
 			old.display()
 		);
 		assert!(
 			old.join("VERSION").exists(),
-			"Internal Error: $GEODE_SDK/VERSION not found. Please reinstall the Geode SDK."
+			"Internal Error: $SAPFIRE_SDK/VERSION not found. Please reinstall the Sapfire SDK."
 		);
 		assert!(
 			!path.exists(),
@@ -698,7 +698,7 @@ fn set_sdk_path(path: PathBuf, do_move: bool) {
 		);
 		assert!(
 			path.join("VERSION").exists(),
-			"{} is either malformed or not a Geode SDK installation",
+			"{} is either malformed or not a Sapfire SDK installation",
 			path.to_str().unwrap()
 		);
 	}
@@ -723,7 +723,7 @@ pub fn get_version() -> Version {
 #[cfg(not(windows))]
 fn download_xwin(dest: &Path) -> Result<(), Box<dyn std::error::Error>> {
 	let resp = reqwest::blocking::Client::builder()
-		.user_agent(format!("geode-cli/{}", env!("CARGO_PKG_VERSION")))
+		.user_agent(format!("sapfire-cli/{}", env!("CARGO_PKG_VERSION")))
 		.build()?
 		.get("https://api.github.com/repos/Jake-Shadle/xwin/releases/latest")
 		.send()?;
@@ -867,7 +867,7 @@ fn install_linux(
 		info!("Cloning the CMake toolchain");
 
 		clone_repo(
-			"https://github.com/geode-sdk/clang-msvc-sdk",
+			"https://github.com/sapfire-sdk/clang-msvc-sdk",
 			&toolchain_path,
 		)
 		.nice_unwrap("Could not download the CMake toolchain");
@@ -891,7 +891,7 @@ pub fn subcommand(config: &mut Config, cmd: Sdk) {
 				if let Some(path) = get_sdk_path() {
 					fatal!(
 						"SDK is already installed at {} - if you meant to \
-						update the SDK, use `geode sdk update`, or if you \
+						update the SDK, use `sapfire sdk update`, or if you \
 						want to change the install location use the --reinstall \
 						option",
 						path.display()
@@ -903,15 +903,15 @@ pub fn subcommand(config: &mut Config, cmd: Sdk) {
 				Some(p) => p,
 				None => {
 					let default_path = if cfg!(target_os = "macos") {
-						PathBuf::from("/Users/Shared/Geode/sdk")
+						PathBuf::from("/Users/Shared/Sapfire/sdk")
 					} else {
 						dirs::document_dir()
 							.nice_unwrap(
 								"No default path available! \
 								Please provide the path manually as an\
-								argument to `geode sdk install`",
+								argument to `sapfire sdk install`",
 							)
-							.join("Geode")
+							.join("Sapfire")
 					};
 					if !confirm!(
 						"Installing at default path {}. Is this okay?",
@@ -919,7 +919,7 @@ pub fn subcommand(config: &mut Config, cmd: Sdk) {
 					) {
 						fatal!(
 							"Please provide the path as an argument \
-							to `geode sdk install`"
+							to `sapfire sdk install`"
 						);
 					}
 					default_path
@@ -933,7 +933,7 @@ pub fn subcommand(config: &mut Config, cmd: Sdk) {
 		}
 		Sdk::SetPath { path, r#move } => set_sdk_path(path, r#move),
 		Sdk::Update { branch } => update(config, branch),
-		Sdk::Version => info!("Geode SDK version: {}", get_version()),
+		Sdk::Version => info!("Sapfire SDK version: {}", get_version()),
 		Sdk::InstallBinaries { platform, version } => install_binaries(config, platform, version),
 
 		#[cfg(not(windows))]

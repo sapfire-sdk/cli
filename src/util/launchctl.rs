@@ -13,12 +13,12 @@ fn format_env(path: &str) -> String {
 		<plist version="1.0">
 		<dict>
 		    <key>Label</key>
-		    <string>com.geode-sdk.env</string>
+		    <string>com.sapfire-sdk.env</string>
 		    <key>ProgramArguments</key>
 		    <array>
 		    <string>sh</string>
 		    <string>-c</string>
-		    <string>launchctl setenv GEODE_SDK {}</string>
+		    <string>launchctl setenv SAPFIRE_SDK {}</string>
 		    </array>
 		    <key>RunAtLoad</key>
 		    <true/>
@@ -52,7 +52,7 @@ pub fn set_sdk_env(path: &str) -> bool {
 		.unwrap()
 		.join("Library")
 		.join("LaunchAgents")
-		.join("com.geode-sdk.env.plist");
+		.join("com.sapfire-sdk.env.plist");
 	let reinstall = env_dir.exists();
 
 	if let Err(e) = fs::write(&env_dir, format_env(path)) {

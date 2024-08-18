@@ -36,7 +36,7 @@ pub struct Config {
 }
 
 fn default_index_url() -> String {
-	"https://api.geode-sdk.org".to_string()
+	"https://api.sapfire-sdk.org".to_string()
 }
 
 // old config.json structures for migration
@@ -107,21 +107,21 @@ impl OldConfig {
 			sdk_version: None,
 			other: HashMap::new(),
 			index_token: None,
-			index_url: "https://api.geode-sdk.org".to_string(),
+			index_url: "https://api.sapfire-sdk.org".to_string(),
 		}
 	}
 }
 
-pub fn geode_root() -> PathBuf {
+pub fn sapfire_root() -> PathBuf {
 	// get data dir per-platform
 	let data_dir: PathBuf;
 	#[cfg(any(windows, target_os = "linux", target_os = "android"))]
 	{
-		data_dir = dirs::data_local_dir().unwrap().join("Geode");
+		data_dir = dirs::data_local_dir().unwrap().join("Sapfire");
 	};
 	#[cfg(target_os = "macos")]
 	{
-		data_dir = PathBuf::from("/Users/Shared/Geode");
+		data_dir = PathBuf::from("/Users/Shared/Sapfire");
 	};
 	#[cfg(not(any(
 		windows,
@@ -173,18 +173,18 @@ impl Profile {
 		}
 	}
 
-	pub fn geode_dir(&self) -> PathBuf {
+	pub fn sapfire_dir(&self) -> PathBuf {
 		if self.platform == "win" {
-			self.gd_path.parent().unwrap().join("geode")
+			self.gd_path.parent().unwrap().join("sapfire")
 		} else if self.platform == "android32" || self.platform == "android64" {
-			self.gd_path.join("game/geode")
+			self.gd_path.join("game/sapfire")
 		} else {
-			self.gd_path.join("Contents/geode")
+			self.gd_path.join("Contents/sapfire")
 		}
 	}
 
 	pub fn mods_dir(&self) -> PathBuf {
-		self.geode_dir().join("mods")
+		self.sapfire_dir().join("mods")
 	}
 
 	pub fn platform_str(&self) -> &str {
@@ -208,27 +208,27 @@ impl Config {
 	}
 
 	pub fn try_sdk_path() -> Result<PathBuf, String> {
-		let sdk_var = std::env::var("GEODE_SDK").map_err(|_| {
-			"Unable to find Geode SDK (GEODE_SDK isn't set). Please install \
-				it using `geode sdk install` or use `geode sdk set-path` to set \
+		let sdk_var = std::env::var("SAPFIRE_SDK").map_err(|_| {
+			"Unable to find Sapfire SDK (SAPFIRE_SDK isn't set). Please install \
+				it using `sapfire sdk install` or use `sapfire sdk set-path` to set \
 				it to an existing clone. If you just installed the SDK using \
-				`geode sdk install`, please restart your terminal / computer to \
+				`sapfire sdk install`, please restart your terminal / computer to \
 				apply changes."
 		})?;
 
 		let path = PathBuf::from(sdk_var);
 		if !path.is_dir() {
 			return Err(format!(
-				"Internal Error: GEODE_SDK doesn't point to a directory ({}). This \
-				might be caused by having run `geode sdk set-path` - try restarting \
-				your terminal / computer, or reinstall using `geode sdk install --reinstall`",
+				"Internal Error: SAPFIRE_SDK doesn't point to a directory ({}). This \
+				might be caused by having run `sapfire sdk set-path` - try restarting \
+				your terminal / computer, or reinstall using `sapfire sdk install --reinstall`",
 				path.display()
 			));
 		}
 		if !path.join("VERSION").exists() {
 			return Err(
-				"Internal Error: GEODE_SDK/VERSION not found. Please reinstall \
-				the Geode SDK using `geode sdk install --reinstall`"
+				"Internal Error: SAPFIRE_SDK/VERSION not found. Please reinstall \
+				the Sapfire SDK using `sapfire sdk install --reinstall`"
 					.into(),
 			);
 		}
@@ -242,13 +242,13 @@ impl Config {
 
 	/// Path to cross-compilation tools
 	pub fn cross_tools_path() -> PathBuf {
-		geode_root().join("cross-tools")
+		sapfire_root().join("cross-tools")
 	}
 
 	pub fn new() -> Config {
-		if !geode_root().exists() {
-			warn!("It seems you don't have Geode installed. Some operations will not work");
-			warn!("You can setup Geode using `geode config setup`");
+		if !sapfire_root().exists() {
+			warn!("It seems you don't have Sapfire installed. Some operations will not work");
+			warn!("You can setup Sapfire using `sapfire config setup`");
 
 			return Config {
 				current_profile: None,
@@ -258,14 +258,14 @@ impl Config {
 				sdk_version: None,
 				other: HashMap::<String, Value>::new(),
 				index_token: None,
-				index_url: "https://api.geode-sdk.org".to_string(),
+				index_url: "https://api.sapfire-sdk.org".to_string(),
 			};
 		}
 
-		let config_json = geode_root().join("config.json");
+		let config_json = sapfire_root().join("config.json");
 
 		let mut output: Config = if !config_json.exists() {
-			info!("Setup Geode using `geode config setup`");
+			info!("Setup Sapfire using `sapfire config setup`");
 			// Create new config
 			Config {
 				current_profile: None,
@@ -275,7 +275,7 @@ impl Config {
 				sdk_version: None,
 				index_token: None,
 				other: HashMap::<String, Value>::new(),
-				index_url: "https://api.geode-sdk.org".to_string(),
+				index_url: "https://api.sapfire-sdk.org".to_string(),
 			}
 		} else {
 			// Parse config
@@ -306,8 +306,8 @@ impl Config {
 		output.save();
 
 		if output.profiles.is_empty() {
-			warn!("No Geode profiles found! Some operations will be unavailable.");
-			warn!("Setup Geode using `geode config setup`");
+			warn!("No Sapfire profiles found! Some operations will be unavailable.");
+			warn!("Setup Sapfire using `sapfire config setup`");
 		} else if output.get_profile(&output.current_profile).is_none() {
 			output.current_profile = Some(output.profiles[0].borrow().name.clone());
 		}
@@ -316,9 +316,9 @@ impl Config {
 	}
 
 	pub fn save(&self) {
-		std::fs::create_dir_all(geode_root()).nice_unwrap("Unable to create Geode directory");
+		std::fs::create_dir_all(sapfire_root()).nice_unwrap("Unable to create Sapfire directory");
 		std::fs::write(
-			geode_root().join("config.json"),
+			sapfire_root().join("config.json"),
 			serde_json::to_string(self).unwrap(),
 		)
 		.nice_unwrap("Unable to save config");

@@ -57,7 +57,7 @@ struct PendingModVersion {
 	name: String,
 	version: String,
 	description: Option<String>,
-	geode: String,
+	sapfire: String,
 	early_load: bool,
 	api: bool,
 	mod_id: String,
@@ -76,7 +76,7 @@ impl Display for PendingModVersion {
 			"  - Description: {}",
 			self.description.as_deref().unwrap_or("None")
 		)?;
-		writeln!(f, "  - Geode: {}", self.geode)?;
+		writeln!(f, "  - Sapfire: {}", self.sapfire)?;
 		writeln!(f, "  - Early Load: {}", self.early_load)?;
 		writeln!(f, "  - API: {}", self.api)?;
 		writeln!(f, "  - GD:")?;
@@ -166,18 +166,18 @@ fn get_pending_mods(page: i32, config: &Config) -> PaginatedData<PendingMod> {
 		.get(url)
 		.bearer_auth(config.index_token.clone().unwrap())
 		.send()
-		.nice_unwrap("Failed to connect to the Geode Index");
+		.nice_unwrap("Failed to connect to the Sapfire Index");
 
 	if response.status() != 200 {
 		if let Ok(body) = response.json::<ApiResponse<String>>() {
 			warn!("{}", body.error);
 		}
-		fatal!("Bad response from Geode Index");
+		fatal!("Bad response from Sapfire Index");
 	}
 
 	let data: ApiResponse<PaginatedData<PendingMod>> = response
 		.json()
-		.nice_unwrap("Failed to parse response from the Geode Index");
+		.nice_unwrap("Failed to parse response from the Sapfire Index");
 
 	data.payload
 }
@@ -293,10 +293,10 @@ fn get_developer_profile(username: &str, config: &Config) -> Option<DeveloperPro
 	let response = client
 		.get(url)
 		.query(&[("query", username)])
-		.header(USER_AGENT, "GeodeCLI")
+		.header(USER_AGENT, "SapfireCLI")
 		.bearer_auth(config.index_token.clone().unwrap())
 		.send()
-		.nice_unwrap("Unable to connect to Geode Index");
+		.nice_unwrap("Unable to connect to Sapfire Index");
 
 	if response.status() != 200 {
 		warn!("Unable to fetch profile: {}", response.status());
@@ -395,13 +395,13 @@ fn validate_mod(version: &PendingModVersion, id: &str, config: &Config) {
 			"status": "accepted"
 		}))
 		.send()
-		.nice_unwrap("Failed to connect to the Geode Index");
+		.nice_unwrap("Failed to connect to the Sapfire Index");
 
 	if response.status() != 204 {
 		if let Ok(body) = response.json::<ApiResponse<String>>() {
 			warn!("{}", body.error);
 		}
-		fatal!("Bad response from Geode Index");
+		fatal!("Bad response from Sapfire Index");
 	}
 
 	info!("Mod validated");
@@ -422,13 +422,13 @@ fn reject_mod(version: &PendingModVersion, id: &str, config: &Config) {
 			"info": reason
 		}))
 		.send()
-		.nice_unwrap("Failed to connect to the Geode Index");
+		.nice_unwrap("Failed to connect to the Sapfire Index");
 
 	if response.status() != 204 {
 		if let Ok(body) = response.json::<ApiResponse<String>>() {
 			warn!("{}", body.error);
 		}
-		fatal!("Bad response from Geode Index");
+		fatal!("Bad response from Sapfire Index");
 	}
 
 	info!("Mod rejected");
@@ -443,19 +443,19 @@ fn download_mod(version: &PendingModVersion, id: &str, config: &Config) {
 		.get(url)
 		.bearer_auth(config.index_token.clone().unwrap())
 		.send()
-		.nice_unwrap("Failed to connect to the Geode Index");
+		.nice_unwrap("Failed to connect to the Sapfire Index");
 
 	if response.status() != 200 {
 		if let Ok(body) = response.json::<ApiResponse<String>>() {
 			warn!("{}", body.error);
 		}
-		fatal!("Bad response from Geode Index");
+		fatal!("Bad response from Sapfire Index");
 	}
 
 	let data = response.bytes().nice_unwrap("Failed to download mod");
 
 	let mods_dir = config.get_current_profile().mods_dir();
-	let mod_path = mods_dir.join(format!("{}.geode", version.mod_id));
+	let mod_path = mods_dir.join(format!("{}.sapfire", version.mod_id));
 
 	std::fs::write(mod_path, data).nice_unwrap("Failed to save mod");
 

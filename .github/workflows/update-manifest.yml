@@ -1,4 +1,4 @@
-# Update cli manifest in geode-sdk/homebrew-geode
+# Update cli manifest in sapfire-sdk/homebrew-sapfire
 # TODO: update the winget one too :P
 name: Update CLI Manifests
 
@@ -18,9 +18,9 @@ jobs:
     - name: Checkout homebrew tap
       uses: actions/checkout@v4
       with:
-        repository: geode-sdk/homebrew-geode
-        path: homebrew-geode
-        token: ${{ secrets.GEODE_BOT_PUSH_BIN_TOKEN }}
+        repository: sapfire-sdk/homebrew-sapfire
+        path: homebrew-sapfire
+        token: ${{ secrets.SAPFIRE_BOT_PUSH_BIN_TOKEN }}
 
     - name: Fetch release info
       uses: actions/github-script@v6
@@ -29,7 +29,7 @@ jobs:
         result-encoding: string
         script: |
           let rel = await github.rest.repos.getLatestRelease({
-            owner: 'geode-sdk',
+            owner: 'sapfire-sdk',
             repo: 'cli',
           });
 
@@ -43,19 +43,19 @@ jobs:
       shell: bash
       run: |
         URL="${{ steps.fetch-mac-release.outputs.result }}"
-        GEODE_HASH=$(curl -L $URL | sha256sum | awk '{print $1}')
-        cd homebrew-geode/Formula
-        cp geode-cli.rb.in geode-cli.rb
-        sed -i -e "s|DOWNLOAD_URL|$URL|g" geode-cli.rb
-        sed -i -e "s/HASH/$GEODE_HASH/g" geode-cli.rb
+        SAPFIRE_HASH=$(curl -L $URL | sha256sum | awk '{print $1}')
+        cd homebrew-sapfire/Formula
+        cp sapfire-cli.rb.in sapfire-cli.rb
+        sed -i -e "s|DOWNLOAD_URL|$URL|g" sapfire-cli.rb
+        sed -i -e "s/HASH/$SAPFIRE_HASH/g" sapfire-cli.rb
 
     - name: Push to repo
       shell: bash
-      working-directory: ${{ github.workspace }}/homebrew-geode
+      working-directory: ${{ github.workspace }}/homebrew-sapfire
       run: |
-        git config --local user.email "${{ secrets.GEODE_BOT_EMAIL }}"
-        git config --local user.name "GeodeBot"
+        git config --local user.email "${{ secrets.SAPFIRE_BOT_EMAIL }}"
+        git config --local user.name "SapfireBot"
         git add .
         git commit -m "Update CLI"
-        git remote set-url origin "https://GeodeBot:${{ secrets.GEODE_BOT_PUSH_BIN_TOKEN }}@github.com/geode-sdk/homebrew-geode.git"
+        git remote set-url origin "https://SapfireBot:${{ secrets.SAPFIRE_BOT_PUSH_BIN_TOKEN }}@github.com/sapfire-sdk/homebrew-sapfire.git"
         git push || true

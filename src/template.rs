@@ -40,9 +40,9 @@ fn create_template(template: CreateTemplate) {
 	} else if template.template.contains('/') {
 		(template.template.as_str(), "main")
 	} else if template.template.is_empty() {
-		("geode-sdk/example-mod", "main")
+		("sapfire-sdk/example-mod", "main")
 	} else {
-		("geode-sdk/example-mod", match template.template.to_ascii_lowercase().as_str() {
+		("sapfire-sdk/example-mod", match template.template.to_ascii_lowercase().as_str() {
 			"default" => "main",
 			"minimal" => "minimal",
 			"custom layer" => "custom-layer",
@@ -99,14 +99,14 @@ fn create_template(template: CreateTemplate) {
 	}
 
 	// Add cross-platform action
-	// Download the action from https://raw.githubusercontent.com/geode-sdk/build-geode-mod/main/examples/multi-platform.yml
+	// Download the action from https://raw.githubusercontent.com/sapfire-sdk/build-sapfire-mod/main/examples/multi-platform.yml
 	if template.action {
 		let action_path = template
 			.project_location
 			.join(".github/workflows/multi-platform.yml");
 		fs::create_dir_all(action_path.parent().unwrap())
 			.nice_unwrap("Unable to create .github/workflows directory");
-		let action = reqwest::blocking::get("https://raw.githubusercontent.com/geode-sdk/build-geode-mod/main/examples/multi-platform.yml").nice_unwrap("Unable to download action");
+		let action = reqwest::blocking::get("https://raw.githubusercontent.com/sapfire-sdk/build-sapfire-mod/main/examples/multi-platform.yml").nice_unwrap("Unable to download action");
 		fs::write(
 			action_path,
 			action.text().nice_unwrap("Unable to write action"),
@@ -122,7 +122,7 @@ fn create_template(template: CreateTemplate) {
 				fs::read_to_string(&mod_json_path).nice_unwrap("Unable to read mod.json file");
 
 			mod_json
-				.replace("$GEODE_VERSION", &get_version().to_string())
+				.replace("$SAPFIRE_VERSION", &get_version().to_string())
 				.replace("$MOD_VERSION", &template.version)
 				.replace("$MOD_ID", &template.id)
 				.replace("$MOD_NAME", &template.name)
@@ -131,7 +131,7 @@ fn create_template(template: CreateTemplate) {
 		} else {
 			// Default mod.json
 			let mod_json = json!({
-				"geode":        get_version().to_string(),
+				"sapfire":        get_version().to_string(),
 				"version":      template.version,
 				"id":           template.id,
 				"name":         template.name,
@@ -193,7 +193,7 @@ pub fn build_template(config: &mut Config, location: Option<PathBuf>) {
 		info!(
 			"Using '{}' as the default developer for all future projects. \
 			If this is undesirable, you can set a default developer using \
-			`geode config set default-developer <name>`",
+			`sapfire config set default-developer <name>`",
 			&final_developer
 		);
 		config.default_developer = Some(final_developer.clone());

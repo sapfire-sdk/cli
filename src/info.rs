@@ -7,7 +7,7 @@ use std::cell::RefCell;
 use std::io::BufRead;
 
 /**
- * geode info
+ * sapfire info
  */
 use std::path::PathBuf;
 
@@ -35,7 +35,7 @@ pub enum Info {
 	/// List possible values
 	List,
 
-	/// Setup config (if you have manually installed Geode)
+	/// Setup config (if you have manually installed Sapfire)
 	Setup {},
 }
 
@@ -64,7 +64,7 @@ pub fn subcommand(config: &mut Config, cmd: Info) {
 				config.sdk_nightly =
 					get_bool(&value).nice_unwrap(format!("'{}' cannot be parsed as a bool", value));
 			} else if field == "sdk-path" {
-				fail!("Set the SDK Path using `geode sdk set-path <PATH>`");
+				fail!("Set the SDK Path using `sapfire sdk set-path <PATH>`");
 				return;
 			} else {
 				fail!("Unknown field {}", field);

@@ -56,13 +56,13 @@ pub fn login(config: &mut Config, token: Option<String>) {
 
 	let response: reqwest::blocking::Response = client
 		.post(index::get_index_url("/v1/login/github".to_string(), config))
-		.header(USER_AGENT, "GeodeCli")
+		.header(USER_AGENT, "SapfireCli")
 		.json(&{})
 		.send()
-		.nice_unwrap("Unable to connect to Geode Index");
+		.nice_unwrap("Unable to connect to Sapfire Index");
 
 	if response.status() != 200 {
-		fatal!("Unable to connect to Geode Index");
+		fatal!("Unable to connect to Sapfire Index");
 	}
 
 	let parsed = response
@@ -105,9 +105,9 @@ fn poll_login(
 			config,
 		))
 		.json(&body)
-		.header(USER_AGENT, "GeodeCLI")
+		.header(USER_AGENT, "SapfireCLI")
 		.send()
-		.nice_unwrap("Unable to connect to Geode Index");
+		.nice_unwrap("Unable to connect to Sapfire Index");
 
 	if response.status() != 200 {
 		return None;
@@ -162,10 +162,10 @@ fn invalidate_index_tokens(config: &mut Config) {
 
 	let response = client
 		.delete(index::get_index_url("/v1/me/tokens".to_string(), config))
-		.header(USER_AGENT, "GeodeCLI")
+		.header(USER_AGENT, "SapfireCLI")
 		.bearer_auth(token)
 		.send()
-		.nice_unwrap("Unable to connect to Geode Index");
+		.nice_unwrap("Unable to connect to Sapfire Index");
 
 	if response.status() == 401 {
 		config.index_token = None;
